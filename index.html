@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belka Travel Concierge - 3 Language Interactive Slideshow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: #1a1714;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #f7f3ea;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .slideshow-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0905 0%, #1a1714 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        .slide.active {
+            opacity: 1;
+        }
+        
+        .slide img {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .page-counter {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: rgba(0,0,0,0.7);
+            color: #e7c872;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 16px;
+            border: 1px solid #d4a574;
+        }
+        
+        .controls {
+            background: linear-gradient(to bottom, #2a251f 0%, #1f1a14 100%);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            border-top: 3px solid #d4a574;
+            flex-wrap: wrap;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        }
+        
+        .control-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .lang-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        button {
+            background: #3d3630;
+            color: #e7c872;
+            border: 2px solid #d4a574;
+            padding: 12px 22px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        button:hover {
+            background: #d4a574;
+            color: #1a1714;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(212, 165, 116, 0.3);
+        }
+        
+        button.active {
+            background: #e7c872;
+            color: #1a1714;
+            border-color: #e7c872;
+            box-shadow: 0 0 12px rgba(231, 200, 114, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .status-display {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: #d4a574;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        
+        .page-info {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: #e7c872;
+            letter-spacing: 1px;
+        }
+        
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 0 200px;
+        }
+        
+        .progress-bar {
+            width: 120px;
+            height: 5px;
+            background: #3d3630;
+            border-radius: 3px;
+            overflow: hidden;
+            border: 1px solid #5d5650;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e7c872, #f0d99a);
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 6px rgba(231, 200, 114, 0.6);
+        }
+        
+        .timer {
+            min-width: 35px;
+            text-align: right;
+            font-weight: 700;
+            color: #e7c872;
+            font-size: 13px;
+        }
+        
+        @media (max-width: 1024px) {
+            .controls { flex-direction: column; gap: 15px; }
+            .status-display { flex-direction: column; gap: 10px; }
+            .progress-container { flex: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .page-counter { top: 15px; left: 15px; font-size: 14px; }
+            .controls { padding: 15px 20px; gap: 10px; }
+            button { padding: 10px 16px; font-size: 12px; }
+            .control-section { flex: 1; justify-content: center; }
+        }
+        
+        /* Smooth font rendering */
+        @font-face {
+            font-family: 'Segoe UI';
+            src: local('Segoe UI'), local('Segoe UI Web Regular'), local('Segoe UI');
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="slideshow-area" id="slideshowArea">
+            <div class="page-counter">
+                <span id="pageNum">1</span> / <span id="pageTotal">16</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-section">
+                <div class="lang-buttons">
+                    <button class="lang-btn active" data-lang="ru" title="Russian (Русский)">RU</button>
+                    <button class="lang-btn" data-lang="ar" title="Arabic (العربية)">AR</button>
+                    <button class="lang-btn" data-lang="en" title="English">EN</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <div class="nav-buttons">
+                    <button id="prevBtn" title="Previous (← Arrow)">← PREV</button>
+                    <button id="playPauseBtn" title="Play/Pause (Space)">⏸ PAUSE</button>
+                    <button id="nextBtn" title="Next (→ Arrow)">NEXT →</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <div class="page-info" id="pageInfo">Page 1 of 16</div>
+            </div>
+            
+            <div class="control-section">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="timer" id="timer">30s</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_PAGES = 16;
+        const AUTO_ADVANCE_TIME = 30000; // 30 seconds
+        let currentPage = 0;
+        let currentLang = 'ru';
+        let isPlaying = true;
+        let autoAdvanceTimer = null;
+        let progressTimer = null;
+        let timeRemaining = 30;
+        
+        const langBtns = document.querySelectorAll('.lang-btn');
+        const slideshowArea = document.getElementById('slideshowArea');
+        const pageNumEl = document.getElementById('pageNum');
+        const pageInfoEl = document.getElementById('pageInfo');
+        const pageTotal = document.getElementById('pageTotal');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressFill = document.getElementById('progressFill');
+        const timerEl = document.getElementById('timer');
+        
+        // Cache of created slides
+        const slideCache = {};
+
+        function getSlideImage(page, lang) {
+            // For English, use Russian images as base
+            const useLang = (lang === 'en') ? 'ru' : lang;
+            return `pg_${useLang}_${String(page + 1).padStart(2, '0')}.png`;
+        }
+
+        function updateSlide() {
+            // Hide all slides
+            const allSlides = document.querySelectorAll('.slide');
+            allSlides.forEach(s => s.classList.remove('active'));
+            
+            const slideId = `slide-${currentPage}-${currentLang}`;
+            let slide = document.getElementById(slideId);
+            
+            if (!slide) {
+                slide = document.createElement('div');
+                slide.id = slideId;
+                slide.className = 'slide active';
+                
+                const imgSrc = getSlideImage(currentPage, currentLang);
+                slide.innerHTML = `<img src="${imgSrc}" alt="Page ${currentPage + 1}" onerror="this.src='pg_ru_${String(currentPage + 1).padStart(2, '0')}.png'">`;
+                
+                slideshowArea.appendChild(slide);
+            } else {
+                slide.classList.add('active');
+            }
+            
+            // Update page counter
+            pageNumEl.textContent = currentPage + 1;
+            pageInfoEl.textContent = `Page ${currentPage + 1} of ${TOTAL_PAGES}`;
+        }
+
+        function changeLang(lang) {
+            currentLang = lang;
+            langBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            resetTimer();
+            updateSlide();
+        }
+
+        function nextSlide() {
+            currentPage = (currentPage + 1) % TOTAL_PAGES;
+            resetTimer();
+            updateSlide();
+        }
+
+        function prevSlide() {
+            currentPage = (currentPage - 1 + TOTAL_PAGES) % TOTAL_PAGES;
+            resetTimer();
+            updateSlide();
+        }
+
+        function togglePlayPause() {
+            isPlaying = !isPlaying;
+            playPauseBtn.textContent = isPlaying ? '⏸ PAUSE' : '▶ PLAY';
+            playPauseBtn.title = isPlaying ? 'Pause (Space)' : 'Play (Space)';
+            
+            if (isPlaying) {
+                startAutoAdvance();
+            } else {
+                clearTimeout(autoAdvanceTimer);
+                clearInterval(progressTimer);
+            }
+        }
+
+        function startAutoAdvance() {
+            if (!isPlaying) return;
+            
+            timeRemaining = 30;
+            updateProgressBar();
+            
+            autoAdvanceTimer = setTimeout(() => {
+                nextSlide();
+                startAutoAdvance();
+            }, AUTO_ADVANCE_TIME);
+            
+            progressTimer = setInterval(updateProgressBar, 100);
+        }
+
+        function updateProgressBar() {
+            timeRemaining -= 0.1;
+            if (timeRemaining < 0) timeRemaining = 0;
+            
+            const percent = ((30 - timeRemaining) / 30) * 100;
+            progressFill.style.width = percent + '%';
+            timerEl.textContent = Math.ceil(timeRemaining) + 's';
+        }
+
+        function resetTimer() {
+            clearTimeout(autoAdvanceTimer);
+            clearInterval(progressTimer);
+            if (isPlaying) {
+                startAutoAdvance();
+            }
+        }
+
+        // Event listeners
+        langBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                changeLang(this.dataset.lang);
+            });
+        });
+        
+        prevBtn.addEventListener('click', prevSlide);
+        nextBtn.addEventListener('click', nextSlide);
+        playPauseBtn.addEventListener('click', togglePlayPause);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') { e.preventDefault(); nextSlide(); }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+            if (e.key === ' ') { e.preventDefault(); togglePlayPause(); }
+            if (e.key === '1') { langBtns[0].click(); }
+            if (e.key === '2') { langBtns[1].click(); }
+            if (e.key === '3') { langBtns[2].click(); }
+        });
+
+        // Initialize
+        pageTotal.textContent = TOTAL_PAGES;
+        updateSlide();
+        startAutoAdvance();
+    </script>
+</body>
+</html>
